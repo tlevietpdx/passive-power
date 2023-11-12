@@ -94,42 +94,22 @@ pub fn setup(
 
     // Left floor
     commands.spawn(PlatformBundle::new(
-        Vec3::Vec3::new(-(WINDOW_WIDTH / 2.0) + (FLOOR_THICKNESS / 2.0), 0., 0.0),
-        Vec3::Vec3::new(FLOOR_THICKNESS, WINDOW_HEIGHT, 1.0),
+        Vec3::new(-(WINDOW_WIDTH / 2.0) + (FLOOR_THICKNESS / 2.0), 0., 0.0),
+        Vec3::new(FLOOR_THICKNESS, WINDOW_HEIGHT, 1.0),
         Collider::cuboid(0.5, 0.5),
     ));
 
     // Right floor
-    commands
-        .spawn(SpriteBundle {
-            sprite: Sprite {
-                color: COLOR_FLOOR,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new((WINDOW_WIDTH / 2.0) - (FLOOR_THICKNESS / 2.0), 0., 0.0),
-                scale: Vec3::new(FLOOR_THICKNESS, WINDOW_HEIGHT, 1.0),
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .insert(RigidBody::Fixed)
-        .insert(Collider::cuboid(0.5, 0.5));
+    commands.spawn(PlatformBundle::new(
+        Vec3::new((WINDOW_WIDTH / 2.0) - (FLOOR_THICKNESS / 2.0), 0., 0.0),
+        Vec3::new(FLOOR_THICKNESS, WINDOW_HEIGHT, 1.0),
+        Collider::cuboid(0.5, 0.5),
+    ));
 
     // Top floor
-    commands
-        .spawn(SpriteBundle {
-            sprite: Sprite {
-                color: COLOR_FLOOR,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new(0.0, -WINDOW_BOTTOM_Y - (FLOOR_THICKNESS / 2.0), 0.0),
-                scale: Vec3::new(WINDOW_WIDTH, FLOOR_THICKNESS, 1.0),
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .insert(RigidBody::Fixed)
-        .insert(Collider::cuboid(0.5, 0.5));
+    commands.spawn(PlatformBundle::new(
+        Vec3::new(0.0, -WINDOW_BOTTOM_Y - (FLOOR_THICKNESS / 2.0), 0.0),
+        Vec3::new(WINDOW_WIDTH, FLOOR_THICKNESS, 1.0),
+        Collider::cuboid(0.5, 0.5),
+    ));
 }
