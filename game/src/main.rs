@@ -1,7 +1,9 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::WindowResolution};
+use bevy::{prelude::*, window::WindowResolution};
 use bevy_rapier2d::prelude::*;
 
+mod consts;
 mod environment;
+mod player;
 
 fn main() {
     // App::new()
@@ -12,18 +14,21 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Bevy Platformer".to_string(),
-                resolution: WindowResolution::new(
-                    environment::WINDOW_WIDTH,
-                    environment::WINDOW_HEIGHT,
-                ),
+                title: "Passive Power".to_string(),
+                resolution: WindowResolution::new(consts::WINDOW_WIDTH, consts::WINDOW_HEIGHT),
                 resizable: false,
                 ..Default::default()
             }),
             ..Default::default()
         }))
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(200.0)) // Physics plugin
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(10.)) // Physics plugin
         .add_plugins(RapierDebugRenderPlugin::default()) // Debug plugin
-        .add_systems(Startup, environment::setup)
+        .add_systems(Startup, setup)
+        .add_plugins(environment::PlatformsPlugin)
+        .add_plugins(player::PlayerPlugin)
         .run();
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
 }
