@@ -110,7 +110,7 @@ fn anim_idle(
     }
 
     let (player, output, mut sprite) = query.single_mut();
-    if output.effective_translation.x == 0.0 {
+    if output.effective_translation.x == 0.0  && output.effective_translation.y == 0.0 {
         commands.entity(player).remove::<Animation>();
         sprite.index = P_IDLE;
     }
@@ -139,8 +139,8 @@ pub fn setup_player(
             texture_atlas: atlas_handle,
             transform: Transform {
                 translation: Vec3::new(
-                    consts::WINDOW_LEFT_X + 10.0,
-                    consts::WINDOW_BOTTOM_Y + 30.0,
+                    consts::WINDOW_LEFT_X + 500.0,
+                    consts::WINDOW_BOTTOM_Y + 350.0,
                     0.0,
                 ),
                 ..Default::default()
