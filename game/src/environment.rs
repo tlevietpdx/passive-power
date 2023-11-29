@@ -1,7 +1,7 @@
-use bevy::{prelude::*, sprite::{MaterialMesh2dBundle}};
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
-use game::consts;
+use crate::consts;
 
 #[derive(Component)]
 struct Zombie;
@@ -9,13 +9,21 @@ struct Zombie;
 #[derive(Component)]
 struct Spawner;
 
+use super::WinFlag;
+
+use super::{despawn_screen, DisplayQuality, GameState, OnGameScreen, Volume, TEXT_COLOR};
+
 pub struct PlatformsPlugin;
 
 impl Plugin for PlatformsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
-        app.add_systems(Update, spawn_zombies);
-        app.add_systems(Update, despawn_zombies);
+        app.add_systems(OnEnter(GameState::Game), setup)
+            .add_systems(Update, spawn_zombies.run_if(in_state(GameState::Game)))
+            .add_systems(Update, despawn_zombies.run_if(in_state(GameState::Game)))
+            // .add_systems(Update, spawn_flag.run_if(in_state(GameState::Game)))
+            // .add_systems(Update, despawn_flag.run_if(in_state(GameState::Game)))
+            .add_systems(OnExit(GameState::Game), despawn_screen::<Zombie>)
+            .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
     }
 }
 
@@ -27,23 +35,26 @@ struct PlatformBundle {
 }
 
 impl PlatformBundle {
-    fn new(translation: Vec3, scale: Vec3, collider: Collider) -> Self {
-        Self {
-            sprite_bundle: SpriteBundle {
-                sprite: Sprite {
-                    color: consts::COLOR_FLOOR,
+    fn new(translation: Vec3, scale: Vec3, collider: Collider) -> (Self, OnGameScreen) {
+        (
+            Self {
+                sprite_bundle: SpriteBundle {
+                    sprite: Sprite {
+                        color: consts::COLOR_FLOOR,
+                        ..Default::default()
+                    },
+                    transform: Transform {
+                        translation,
+                        scale,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 },
-                transform: Transform {
-                    translation,
-                    scale,
-                    ..Default::default()
-                },
-                ..Default::default()
+                body: RigidBody::Fixed,
+                collider,
             },
-            body: RigidBody::Fixed,
-            collider,
-        }
+            OnGameScreen,
+        )
     }
 }
 
@@ -51,68 +62,23 @@ pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
 ) {
     // commands.spawn(Camera2dBundle::default());
 
-    // Circle
-    commands
-        .spawn(MaterialMesh2dBundle {
-            mesh: meshes.add(shape::Circle::new(50.).into()).into(),
-            material: materials.add(ColorMaterial::from(Color::PURPLE)),
-            transform: Transform::from_translation(Vec3::new(-150., 100., 0.)),
+    // Cube
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: meshes.add(shape::Cube::new(50.).into()).into(),
+            material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+            transform: Transform::from_translation(Vec3::new(50., 0., 0.)),
             ..default()
-        })
-        .insert(RigidBody::Fixed)
-        .insert(Collider::cuboid(25., 25.));
-
-    //Moving object
-    // commands
-    //     .spawn(MaterialMesh2dBundle {
-    //         mesh: meshes.add(shape::Circle::default().into()).into(),
-    //         material: materials.add(ColorMaterial::from(Color::PURPLE)),
-    //         transform: Transform {
-    //             translation: Vec3::new(consts::WINDOW_LEFT_X + 100.0, consts::WINDOW_BOTTOM_Y + 30.0, 0.0),
-    //             scale: Vec3::new(30.0, 30.0, 1.0),
-    //             ..Default::default()
-    //         },
-    //         ..default()
-    //     })
-    //     .insert(RigidBody::KinematicPositionBased)
-    //     .insert(Collider::ball(0.5))
-    //     .insert(KinematicCharacterController::default());
-
-    // Rectangle
-    // commands.spawn(SpriteBundle {
-    //     sprite: Sprite {
-    //         color: Color::rgb(0.25, 0.25, 0.75),
-    //         custom_size: Some(Vec2::new(50.0, 100.0)),
-    //         ..default()
-    //     },
-    //     transform: Transform::from_translation(Vec3::new(-50., -100., 100.)),
-    //     ..default()
-    // }).insert(RigidBody::Fixed)
-    // .insert(Collider::cuboid(25., 25.));
-
-    // Quad
-    // commands.spawn(MaterialMesh2dBundle {
-    //     mesh: meshes
-    //         .add(shape::Quad::new(Vec2::new(50., 100.)).into())
-    //         .into(),
-    //     material: materials.add(ColorMaterial::from(Color::LIME_GREEN)),
-    //     transform: Transform::from_translation(Vec3::new(50., 0., 0.)),
-    //     ..default()
-    // });
-
-    // Hexagon
-    commands.spawn((MaterialMesh2dBundle {
-        mesh: meshes.add(shape::RegularPolygon::new(50., 6).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
-        transform: Transform::from_translation(Vec3::new(50., 0., 0.)),
-        ..default()
-    }, Spawner));
-
-
+        },
+        Spawner,
+        OnGameScreen,
+        RigidBody::Fixed,
+        Collider::cuboid(25., 25.),
+    ));
 
     // Bottom floor
     commands.spawn(PlatformBundle::new(
@@ -157,6 +123,33 @@ pub fn setup(
         Vec3::new(consts::WINDOW_WIDTH, consts::FLOOR_THICKNESS, 1.0),
         Collider::cuboid(0.5, 0.5),
     ));
+
+    let flag: bevy::prelude::Handle<Image> = asset_server.load("texture/flag.png");
+    commands
+        .spawn((
+            SpriteBundle {
+                sprite: Sprite {
+                    color: consts::COLOR_FLOOR,
+                    ..Default::default()
+                },
+                transform: Transform {
+                    translation: Vec3::new(
+                        consts::WINDOW_LEFT_X + 1480.0,
+                        consts::WINDOW_BOTTOM_Y + 800.0,
+                        0.0,
+                    ),
+                    scale: Vec3::new(0.2, 0.2, 1.0),
+                    ..Default::default()
+                },
+                texture: flag,
+                ..Default::default()
+            },
+            OnGameScreen,
+            WinFlag,
+            Collider::cuboid(124., 124.),
+        ))
+        .insert(Sensor);
+    // .insert(RigidBody::Fixed)
 }
 
 fn spawn_zombies(
@@ -168,12 +161,66 @@ fn spawn_zombies(
 ) {
     if time.elapsed_seconds().round() as i32 % 2 == 0 && time.elapsed_seconds() > 1. {
         for mut transform in &mut query {
-            commands.spawn((MaterialMesh2dBundle {
-                mesh: meshes.add(shape::RegularPolygon::new(5., 6).into()).into(),
-                material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
-                transform: Transform::from_translation(Vec3::new(transform.translation.x + 100.0, transform.translation.y, 0.)),
-                ..default()
-            }, Zombie));
+            commands.spawn((
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(shape::Cube::new(25.).into()).into(),
+                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    transform: Transform::from_translation(Vec3::new(
+                        transform.translation.x + 37.5,
+                        transform.translation.y,
+                        0.,
+                    )),
+                    ..default()
+                },
+                Zombie,
+                RigidBody::Fixed,
+                Collider::cuboid(12.5, 12.5),
+            ));
+            commands.spawn((
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(shape::Cube::new(25.).into()).into(),
+                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    transform: Transform::from_translation(Vec3::new(
+                        transform.translation.x - 37.5,
+                        transform.translation.y,
+                        0.,
+                    )),
+                    ..default()
+                },
+                Zombie,
+                RigidBody::Fixed,
+                Collider::cuboid(12.5, 12.5),
+            ));
+            commands.spawn((
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(shape::Cube::new(25.).into()).into(),
+                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    transform: Transform::from_translation(Vec3::new(
+                        transform.translation.x,
+                        transform.translation.y + 37.5,
+                        0.,
+                    )),
+                    ..default()
+                },
+                Zombie,
+                RigidBody::Fixed,
+                Collider::cuboid(12.5, 12.5),
+            ));
+            commands.spawn((
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(shape::Cube::new(25.).into()).into(),
+                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    transform: Transform::from_translation(Vec3::new(
+                        transform.translation.x,
+                        transform.translation.y - 37.5,
+                        0.,
+                    )),
+                    ..default()
+                },
+                Zombie,
+                RigidBody::Fixed,
+                Collider::cuboid(12.5, 12.5),
+            ));
         }
     }
 }
