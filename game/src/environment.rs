@@ -206,7 +206,7 @@ fn spawn_zombies(
                 RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
                 Velocity {
-                    linvel: Vec2::new(10.0, 0.0),
+                    linvel: Vec2::new(20.0, 0.0),
                     angvel: 0.,
                 }
             ));
@@ -225,7 +225,7 @@ fn spawn_zombies(
                 RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
                 Velocity {
-                    linvel: Vec2::new(-10.0, 0.0),
+                    linvel: Vec2::new(-20.0, 0.0),
                     angvel: 0.,
                 }
             ));
@@ -244,7 +244,7 @@ fn spawn_zombies(
                 RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
                 Velocity {
-                    linvel: Vec2::new(0.0, 10.0),
+                    linvel: Vec2::new(0.0, 20.0),
                     angvel: 0.,
                 }
             ));
@@ -263,7 +263,7 @@ fn spawn_zombies(
                 RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
                 Velocity {
-                    linvel: Vec2::new(0.0, -10.0),
+                    linvel: Vec2::new(0.0, -20.0),
                     angvel: 0.,
                 }
             ));

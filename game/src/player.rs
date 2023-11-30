@@ -40,14 +40,6 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, hot_keys.run_if(in_state(GameState::Game)))
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
             .add_plugins(AnimationPlugin);
-        // app.add_systems(Startup, setup_player)
-        //     .add_systems(Update, movement)
-        //     .add_systems(Update, anim_idle)
-        //     .add_systems(Update, anim_mov_d)
-        //     .add_systems(Update, anim_mov_u)
-        //     .add_systems(Update, anim_mov_r)
-        //     .add_systems(Update, anim_mov_l)
-        //     .add_plugins(AnimationPlugin);
     }
 }
 
