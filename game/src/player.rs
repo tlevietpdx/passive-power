@@ -161,8 +161,15 @@ fn exit_game(
     mut game_state: ResMut<NextState<GameState>>,
     mut timer: ResMut<GameTimer>,
     mut pstatus: ResMut<PlayerStatus>,
+    mut query: Query<&mut KinematicCharacterController>,
 ) {
     if *pstatus == PlayerStatus::Paused && timer.tick(time.delta()).finished() {
+        let mut player = query.single_mut();
+        player.translation = Some(Vec2::new(
+            consts::WINDOW_LEFT_X + 730.0,
+            consts::WINDOW_BOTTOM_Y + 50.0,
+        ));
+        *pstatus = PlayerStatus::Active;
         game_state.set(GameState::Menu);
     }
 }
@@ -182,11 +189,6 @@ pub fn movement(
     let mut player = query.single_mut();
 
     let mut translation = Vec2::new(0.0, 0.0);
-
-    // let is_active = match pstatus {
-    //     Res<State<PlayerStatus>>::Active => true,
-    //     Res<State<PlayerStatus>>::Paused => false
-    // };
 
     //move right
     if *pstatus == PlayerStatus::Active {
@@ -209,10 +211,6 @@ pub fn movement(
             translation.y -= time.delta_seconds() * consts::PLAYER_VELOCITY_X;
         }
 
-        // match player.translation {
-        //     Some(vec) => player.translation = Some(Vec2::new(xm,ym)),
-        //     None => player.translation = Some(Vec2::new(0.0, 0.0)),
-        // }
         player.translation = Some(translation);
     }
 }

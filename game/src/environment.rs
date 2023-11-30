@@ -11,7 +11,7 @@ struct Zombie;
 #[derive(Component)]
 struct Spawner;
 
-use super::{WinFlag, despawn_screen, GameState, OnGameScreen};
+use super::{despawn_screen, GameState, OnGameScreen, WinFlag};
 
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
 enum SpawnStatus {
@@ -27,8 +27,6 @@ impl Plugin for PlatformsPlugin {
             .insert_resource(SpawnStatus::Ready)
             .add_systems(Update, spawn_zombies.run_if(in_state(GameState::Game)))
             .add_systems(Update, despawn_zombies.run_if(in_state(GameState::Game)))
-            // .add_systems(Update, spawn_flag.run_if(in_state(GameState::Game)))
-            // .add_systems(Update, despawn_flag.run_if(in_state(GameState::Game)))
             .add_systems(OnExit(GameState::Game), despawn_screen::<Zombie>)
             .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
     }
@@ -78,7 +76,7 @@ pub fn setup(
         let x: f32 = rng.gen_range(-750.0..=750.0);
         let y: f32 = rng.gen_range(-400.0..=400.0);
         let is_spawner: i32 = rng.gen_range(0..=1);
-        
+
         // Cube
         let cube_template = MaterialMesh2dBundle {
             mesh: meshes.add(shape::Cube::new(50.).into()).into(),
@@ -88,14 +86,15 @@ pub fn setup(
         };
 
         if is_spawner == 0 {
-            commands.spawn((cube_template,
+            commands.spawn((
+                cube_template,
                 OnGameScreen,
                 RigidBody::Fixed,
                 Collider::cuboid(25., 25.),
             ));
-        }
-        else {
-            commands.spawn((cube_template,
+        } else {
+            commands.spawn((
+                cube_template,
                 Spawner,
                 OnGameScreen,
                 RigidBody::Fixed,
@@ -103,7 +102,6 @@ pub fn setup(
             ));
         }
     }
-    
 
     // Bottom floor
     commands.spawn(PlatformBundle::new(
@@ -208,7 +206,7 @@ fn spawn_zombies(
                 Velocity {
                     linvel: Vec2::new(20.0, 0.0),
                     angvel: 0.,
-                }
+                },
             ));
             commands.spawn((
                 MaterialMesh2dBundle {
@@ -227,7 +225,7 @@ fn spawn_zombies(
                 Velocity {
                     linvel: Vec2::new(-20.0, 0.0),
                     angvel: 0.,
-                }
+                },
             ));
             commands.spawn((
                 MaterialMesh2dBundle {
@@ -246,7 +244,7 @@ fn spawn_zombies(
                 Velocity {
                     linvel: Vec2::new(0.0, 20.0),
                     angvel: 0.,
-                }
+                },
             ));
             commands.spawn((
                 MaterialMesh2dBundle {
@@ -265,7 +263,7 @@ fn spawn_zombies(
                 Velocity {
                     linvel: Vec2::new(0.0, -20.0),
                     angvel: 0.,
-                }
+                },
             ));
         }
     }

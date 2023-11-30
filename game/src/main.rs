@@ -3,12 +3,12 @@
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_rapier2d::prelude::*;
 
+mod audio;
 mod consts;
 mod environment;
 mod menu;
 mod player;
 mod splash;
-mod audio;
 
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 
