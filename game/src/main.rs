@@ -8,7 +8,7 @@ mod environment;
 mod menu;
 mod player;
 mod splash;
-// mod game_setup;
+mod audio;
 
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 
@@ -32,6 +32,12 @@ enum DisplayQuality {
 // One of the two settings that can be set through the menu. It will be a resource in the app
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
 struct Volume(u32);
+
+impl Volume {
+    fn get_val(self) -> f64 {
+        self.0 as f64 / 10.0
+    }
+}
 
 #[derive(Component)]
 struct OnGameScreen;
@@ -70,6 +76,7 @@ fn main() {
         .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
         .add_plugins(environment::PlatformsPlugin)
         .add_plugins(player::PlayerPlugin)
+        .add_plugins(audio::GameAudioPlugin)
         .run();
 }
 

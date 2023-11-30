@@ -3,21 +3,28 @@ use bevy_rapier2d::prelude::*;
 
 use crate::consts;
 
+use rand::Rng;
+
 #[derive(Component)]
 struct Zombie;
 
 #[derive(Component)]
 struct Spawner;
 
-use super::WinFlag;
+use super::{WinFlag, despawn_screen, GameState, OnGameScreen};
 
-use super::{despawn_screen, DisplayQuality, GameState, OnGameScreen, Volume, TEXT_COLOR};
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+enum SpawnStatus {
+    Ready,
+    Standby,
+}
 
 pub struct PlatformsPlugin;
 
 impl Plugin for PlatformsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Game), setup)
+            .insert_resource(SpawnStatus::Ready)
             .add_systems(Update, spawn_zombies.run_if(in_state(GameState::Game)))
             .add_systems(Update, despawn_zombies.run_if(in_state(GameState::Game)))
             // .add_systems(Update, spawn_flag.run_if(in_state(GameState::Game)))
@@ -66,19 +73,37 @@ pub fn setup(
 ) {
     // commands.spawn(Camera2dBundle::default());
 
-    // Cube
-    commands.spawn((
-        MaterialMesh2dBundle {
+    for _ in 1..=50 {
+        let mut rng = rand::thread_rng();
+        let x: f32 = rng.gen_range(-750.0..=750.0);
+        let y: f32 = rng.gen_range(-400.0..=400.0);
+        let is_spawner: i32 = rng.gen_range(0..=1);
+        
+        // Cube
+        let cube_template = MaterialMesh2dBundle {
             mesh: meshes.add(shape::Cube::new(50.).into()).into(),
             material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
-            transform: Transform::from_translation(Vec3::new(50., 0., 0.)),
+            transform: Transform::from_translation(Vec3::new(x, y, 0.)),
             ..default()
-        },
-        Spawner,
-        OnGameScreen,
-        RigidBody::Fixed,
-        Collider::cuboid(25., 25.),
-    ));
+        };
+
+        if is_spawner == 0 {
+            commands.spawn((cube_template,
+                OnGameScreen,
+                RigidBody::Fixed,
+                Collider::cuboid(25., 25.),
+            ));
+        }
+        else {
+            commands.spawn((cube_template,
+                Spawner,
+                OnGameScreen,
+                RigidBody::Fixed,
+                Collider::cuboid(25., 25.),
+            ));
+        }
+    }
+    
 
     // Bottom floor
     commands.spawn(PlatformBundle::new(
@@ -148,8 +173,8 @@ pub fn setup(
             WinFlag,
             Collider::cuboid(124., 124.),
         ))
-        .insert(Sensor);
-    // .insert(RigidBody::Fixed)
+        .insert(Sensor)
+        .insert(RigidBody::Dynamic);
 }
 
 fn spawn_zombies(
@@ -158,13 +183,18 @@ fn spawn_zombies(
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     mut query: Query<&mut Transform, With<Spawner>>,
+    mut sstatus: ResMut<SpawnStatus>,
 ) {
-    if time.elapsed_seconds().round() as i32 % 2 == 0 && time.elapsed_seconds() > 1. {
-        for mut transform in &mut query {
+    if time.elapsed_seconds().round() as i32 % 2 == 0
+        && time.elapsed_seconds() > 1.
+        && *sstatus == SpawnStatus::Ready
+    {
+        *sstatus = SpawnStatus::Standby;
+        for transform in &mut query {
             commands.spawn((
                 MaterialMesh2dBundle {
                     mesh: meshes.add(shape::Cube::new(25.).into()).into(),
-                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    material: materials.add(ColorMaterial::from(Color::RED)),
                     transform: Transform::from_translation(Vec3::new(
                         transform.translation.x + 37.5,
                         transform.translation.y,
@@ -173,13 +203,17 @@ fn spawn_zombies(
                     ..default()
                 },
                 Zombie,
-                RigidBody::Fixed,
+                RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
+                Velocity {
+                    linvel: Vec2::new(10.0, 0.0),
+                    angvel: 0.,
+                }
             ));
             commands.spawn((
                 MaterialMesh2dBundle {
                     mesh: meshes.add(shape::Cube::new(25.).into()).into(),
-                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    material: materials.add(ColorMaterial::from(Color::RED)),
                     transform: Transform::from_translation(Vec3::new(
                         transform.translation.x - 37.5,
                         transform.translation.y,
@@ -188,13 +222,17 @@ fn spawn_zombies(
                     ..default()
                 },
                 Zombie,
-                RigidBody::Fixed,
+                RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
+                Velocity {
+                    linvel: Vec2::new(-10.0, 0.0),
+                    angvel: 0.,
+                }
             ));
             commands.spawn((
                 MaterialMesh2dBundle {
                     mesh: meshes.add(shape::Cube::new(25.).into()).into(),
-                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    material: materials.add(ColorMaterial::from(Color::RED)),
                     transform: Transform::from_translation(Vec3::new(
                         transform.translation.x,
                         transform.translation.y + 37.5,
@@ -203,13 +241,17 @@ fn spawn_zombies(
                     ..default()
                 },
                 Zombie,
-                RigidBody::Fixed,
+                RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
+                Velocity {
+                    linvel: Vec2::new(0.0, 10.0),
+                    angvel: 0.,
+                }
             ));
             commands.spawn((
                 MaterialMesh2dBundle {
                     mesh: meshes.add(shape::Cube::new(25.).into()).into(),
-                    material: materials.add(ColorMaterial::from(Color::TURQUOISE)),
+                    material: materials.add(ColorMaterial::from(Color::RED)),
                     transform: Transform::from_translation(Vec3::new(
                         transform.translation.x,
                         transform.translation.y - 37.5,
@@ -218,8 +260,12 @@ fn spawn_zombies(
                     ..default()
                 },
                 Zombie,
-                RigidBody::Fixed,
+                RigidBody::KinematicVelocityBased,
                 Collider::cuboid(12.5, 12.5),
+                Velocity {
+                    linvel: Vec2::new(0.0, -10.0),
+                    angvel: 0.,
+                }
             ));
         }
     }
@@ -229,8 +275,10 @@ fn despawn_zombies(
     mut commands: Commands,
     time: Res<Time>,
     mut entities: Query<Entity, With<Zombie>>,
+    mut sstatus: ResMut<SpawnStatus>,
 ) {
     if time.elapsed_seconds().round() as i32 % 3 == 0 && time.elapsed_seconds() > 1. {
+        *sstatus = SpawnStatus::Ready;
         for entity in &mut entities {
             commands.entity(entity).despawn();
         }

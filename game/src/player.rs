@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    text::{BreakLineOn, Text2dBounds},
-};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use std::time::Duration;
@@ -9,10 +6,7 @@ use std::time::Duration;
 use crate::consts;
 use game::animator::{Animation, AnimationPlugin};
 
-use super::{
-    despawn_screen, DisplayQuality, GameState, GameTimer, OnGameScreen, PlayerFlag, Volume,
-    WinFlag, TEXT_COLOR,
-};
+use super::{despawn_screen, GameState, GameTimer, OnGameScreen, PlayerFlag, WinFlag};
 
 const P_WALK_U: &[usize] = &[0, 1, 2, 3, 4, 5, 6, 7, 8];
 const P_WALK_L: &[usize] = &[9, 10, 11, 12, 13, 14, 15, 16, 17];
@@ -92,10 +86,10 @@ pub fn setup_player(
             OnGameScreen,
             PlayerFlag,
         ))
-        .insert(RigidBody::Dynamic)
+        .insert(RigidBody::KinematicVelocityBased)
         .insert(ActiveEvents::COLLISION_EVENTS)
         .insert(Velocity {
-            linvel: Vec2::new(1., 0.),
+            linvel: Vec2::new(0., 0.),
             angvel: 0.,
         })
         .insert(Collider::cuboid(
@@ -107,11 +101,10 @@ pub fn setup_player(
 
 fn display_events(
     mut collision_events: EventReader<CollisionEvent>,
-    mut contact_force_events: EventReader<ContactForceEvent>,
     query: Query<Entity, With<WinFlag>>,
     asset_server: Res<AssetServer>,
     mut commands: Commands,
-    mut game_state: ResMut<NextState<GameState>>,
+    // mut game_state: ResMut<NextState<GameState>>,
     mut pstatus: ResMut<PlayerStatus>,
 ) {
     for collision_event in collision_events.read() {
@@ -168,10 +161,6 @@ fn display_events(
                 println!("Stopped: Entity1 = {:?}, Entity2 = {:?}", entity1, entity2);
             }
         }
-    }
-
-    for contact_force_event in contact_force_events.iter() {
-        println!("Received contact force event: {:?}", contact_force_event);
     }
 }
 
