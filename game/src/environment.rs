@@ -69,8 +69,6 @@ pub fn setup(
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    // commands.spawn(Camera2dBundle::default());
-
     for _ in 1..=50 {
         let mut rng = rand::thread_rng();
         let x: f32 = rng.gen_range(-750.0..=750.0);

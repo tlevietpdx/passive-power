@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-// use bevy_rapier2d::prelude::*;
 
 pub const WINDOW_WIDTH: f32 = 1536.0;
 pub const WINDOW_HEIGHT: f32 = 864.0;
