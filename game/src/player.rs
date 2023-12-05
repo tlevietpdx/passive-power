@@ -34,7 +34,6 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, anim_mov_l.run_if(in_state(GameState::Game)))
             .add_systems(Update, anim_mov_r.run_if(in_state(GameState::Game)))
             .add_systems(Update, anim_mov_u.run_if(in_state(GameState::Game)))
-            
             .add_systems(Update, display_events.run_if(in_state(GameState::Game)))
             .insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)))
             .add_systems(Update, exit_game.run_if(in_state(GameState::Game)))

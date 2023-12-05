@@ -64,19 +64,15 @@ fn main() {
         }))
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1e-12)) // Physics plugin
         .add_plugins(RapierDebugRenderPlugin::default())
-
         .insert_resource(DisplayQuality::Medium)
         .insert_resource(Volume(7))
         .add_state::<GameState>()
-
         .add_systems(Startup, setup)
-        
         .add_plugins(splash::SplashPlugin)
         .add_plugins(menu::MenuPlugin)
         .add_plugins(environment::PlatformsPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(audio::GameAudioPlugin)
-
         .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>)
         .run();
 }
