@@ -64,8 +64,7 @@ impl PlatformBundle {
 }
 
 fn overlaps(fst: (f32, f32), snd: (f32, f32)) -> bool {
-    return (fst.0 - 30. < snd.0 && snd.0 < fst.0 + 30.)
-        || (fst.1 - 30. < snd.1 && snd.1 < fst.1 + 30.);
+    (fst.0 - 30. < snd.0 && snd.0 < fst.0 + 30.) || (fst.1 - 30. < snd.1 && snd.1 < fst.1 + 30.)
 }
 
 fn is_invalid_spot(spots: Vec<(f32, f32)>, new_spot: (f32, f32)) -> bool {
@@ -96,15 +95,17 @@ pub fn setup(
         ),
     ];
     let mut rng = rand::thread_rng();
-    for c in 1..=60 {
-        let mut x: f32 = rng.gen_range(consts::WINDOW_LEFT_X+25. ..=consts::WINDOW_WIDTH/2. -25.);
-        let mut y: f32 = rng.gen_range(consts::WINDOW_BOTTOM_Y +25. ..=consts::WINDOW_HEIGHT/2. -25.);
+    for _c in 1..=60 {
+        let mut x: f32 =
+            rng.gen_range((consts::WINDOW_LEFT_X + 25.)..=(consts::WINDOW_WIDTH / 2. - 25.));
+        let mut y: f32 =
+            rng.gen_range((consts::WINDOW_BOTTOM_Y + 25.)..=(consts::WINDOW_HEIGHT / 2. - 25.));
         let is_spawner: i32 = rng.gen_range(0..=1);
 
         let mut i = 0;
         while is_invalid_spot(spots.clone(), (x, y)) {
-            x = rng.gen_range(consts::WINDOW_LEFT_X+25. ..=consts::WINDOW_WIDTH/2. -25.);
-            y = rng.gen_range(consts::WINDOW_BOTTOM_Y+25. ..=consts::WINDOW_HEIGHT/2. -25.);
+            x = rng.gen_range((consts::WINDOW_LEFT_X + 25.)..=(consts::WINDOW_WIDTH / 2. - 25.));
+            y = rng.gen_range((consts::WINDOW_BOTTOM_Y + 25.)..=(consts::WINDOW_HEIGHT / 2. - 25.));
             i += 1;
             if i > 100 {
                 break;
@@ -118,7 +119,7 @@ pub fn setup(
         if is_spawner == 1 {
             spots.push((x, y));
         }
-        println!("Accept {}", c);
+        // println!("Accept {}", c);
 
         // Cube
         let cube_template = MaterialMesh2dBundle {
