@@ -5,6 +5,7 @@ It is a game where a player need to get to the designated location (marked with 
 ![Alt text](game/game.png)
 
 ## Project execution
+- Change directory to `game` folder using `cd game`.
 - It is easily built with `cargo build --release`, or run with `cargo run`.
 - `cargo test` can be executed beforehand to make sure everything is syntactically correct.
 - First-time compilation will take a long time if the package are not already downloaded.
