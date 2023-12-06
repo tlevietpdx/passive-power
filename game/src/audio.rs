@@ -34,10 +34,8 @@ impl Plugin for GameAudioPlugin {
             .add_audio_channel::<Menu>()
             .add_audio_channel::<InGame>()
             .add_audio_channel::<Splash>()
-            // .add_systems(OnEnter(GameState::Menu), start_bgm)
             .add_systems(Update, start_bgm.run_if(in_state(GameState::Menu)))
             .add_systems(Update, stop_bgm.run_if(in_state(GameState::Game)))
-            // .add_systems(OnEnter(GameState::Game), start_ingame)
             .add_systems(Update, start_ingame.run_if(in_state(GameState::Game)))
             .add_systems(Update, stop_ingame.run_if(in_state(GameState::Menu)))
             .add_systems(OnEnter(GameState::Splash), play_splash);
@@ -54,7 +52,12 @@ fn play_splash(
         .with_volume(volume.get_val());
 }
 
-fn start_bgm(asset_server: Res<AssetServer>, audio: Res<AudioChannel<Menu>>, volume: Res<Volume>, mut mtus: ResMut<BGMInitialized>) {
+fn start_bgm(
+    asset_server: Res<AssetServer>,
+    audio: Res<AudioChannel<Menu>>,
+    volume: Res<Volume>,
+    mut mtus: ResMut<BGMInitialized>,
+) {
     if *mtus == BGMInitialized::No {
         audio
             .play(asset_server.load("audios/bip-bop.ogg"))
@@ -62,17 +65,11 @@ fn start_bgm(asset_server: Res<AssetServer>, audio: Res<AudioChannel<Menu>>, vol
             .looped();
         audio.pause();
         *mtus = BGMInitialized::Yes;
-    }
-    else {
+    } else {
         audio.set_volume(volume.get_val());
         audio.resume();
     }
 }
-
-// fn resume_bgm(audio: Res<AudioChannel<Menu>>, volume: Res<Volume>) {
-//     audio.set_volume(volume.get_val());
-//     audio.resume();
-// }
 
 fn stop_bgm(audio: Res<AudioChannel<Menu>>) {
     audio.pause();
@@ -82,7 +79,7 @@ fn start_ingame(
     asset_server: Res<AssetServer>,
     audio: Res<AudioChannel<InGame>>,
     volume: Res<Volume>,
-    mut mtus: ResMut<GMInitialized>
+    mut mtus: ResMut<GMInitialized>,
 ) {
     if *mtus == GMInitialized::No {
         audio
@@ -91,17 +88,11 @@ fn start_ingame(
             .looped();
         audio.pause();
         *mtus = GMInitialized::Yes;
-    }
-    else {
+    } else {
         audio.set_volume(volume.get_val());
         audio.resume();
     }
 }
-
-// fn resume_ingame(audio: Res<AudioChannel<InGame>>, volume: Res<Volume>) {
-//     audio.set_volume(volume.get_val());
-//     audio.resume();
-// }
 
 fn stop_ingame(audio: Res<AudioChannel<InGame>>) {
     audio.pause();
