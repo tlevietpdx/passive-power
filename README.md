@@ -41,3 +41,11 @@ It is a game where a player need to get to the designated location (marked with 
 Overall, I'm happy with what I have achieved, it did take a lot of time to go through the Bevy documents and put everything together, once the code is compiled successfully, it almost guarantees that the game work seamlessly without a problem.
 
 There are rooms for improvements and it can be easily done with a reasonable time frame for exploring and coding such as adding more sound effects, different kinds of obstacles, enemies, background effects (winds, limited vision, flashes...). More levels can be added, custom levels, time-constrained level, generally a GUI to help users create a level. 
+
+## Credits
+[Textures + Audio](github.com/bevyengine/bevy/tree/main/assets)
+[Game menu](github.com/bevyengine/bevy/blob/main/examples/games/game_menu.rs)
+[Game logic](github.com/REllEK-IO/snake_bevy)
+[Sprite sheet](michaelcummings.net/mathoms/creating-2d-animated-sprites-using-unity-4-3)
+[Audio Tutorial](github.com/NiklasEi/bevy_kira_audio/blob/main/examples/basic.rs)
+[Sprite tutorials](github.com/affanshahid/bevy-platformer/tree/learning-game-dev-bevy-3)
